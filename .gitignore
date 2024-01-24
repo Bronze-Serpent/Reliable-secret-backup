@@ -32,3 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 /.mvn/wrapper/
+/src/main/resources/credentials.json
+/tokens/StoredCredential
+/src/main/resources/test.txt
+/src/main/resources/заметки
