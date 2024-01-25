@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/reliable_secret_backup
+    password: pass
+    username: postgres
+  mail:
+    host: smtp.gmail.com
+    port: 465
+    username: reliablesecretbackup@gmail.com
+    password: pcae ezhv ahog jyav
+    test-connection: true # проверка подключения при старте приложения
+    properties: # эта секция только для gmail
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            enable: true

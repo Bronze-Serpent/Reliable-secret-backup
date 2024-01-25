@@ -22,8 +22,6 @@ import java.security.spec.InvalidKeySpecException;
 @Service
 public class DefaultCryptoProviderService implements CryptoService
 {
-    // TODO: 24.01.2024 определиться с ключами для контейнеров и создавать cipher бинами, чтобы переиспользовать их.
-    //  Хотя если ключи разные - переиспользовать не выйдет
 
     private final MessageDigest messageDigest;
     private final SecretKeyFactory secretKeyFactory;

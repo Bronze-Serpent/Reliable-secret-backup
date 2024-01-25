@@ -1,10 +1,10 @@
 package com.barabanov.backup;
 
-import com.barabanov.backup.cloud.CloudService;
+import com.barabanov.backup.email.EmailServiceImpl;
+import jakarta.mail.MessagingException;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.support.GenericApplicationContext;
 
 import java.io.FileNotFoundException;
 
@@ -19,10 +19,18 @@ public class ReliableSecretBackupApplication
 		builder.headless(false);
 		ConfigurableApplicationContext context = builder.run(args);
 
+		EmailServiceImpl bean = context.getBean(EmailServiceImpl.class);
+		try {
+			bean.sendHtmlEmail(
+					"pbarabanov04@gmail.com",
+					"Мой тема",
+					"<p>Текст <b>html</b></p>");
+		} catch (MessagingException e) {
+			throw new RuntimeException(e);
+		}
 
-
-		CloudService cloudService = context.getBean(CloudService.class);
-		cloudService.testConnection();
+//		CloudService cloudService = context.getBean(CloudService.class);
+//		cloudService.testConnection();
 
 //		String folderId = cloudService.createFolder("my folder", null);
 //		String anotherFolderId = cloudService.createFolder("another folder", folderId);
