@@ -17,6 +17,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
+
 @RequiredArgsConstructor
 @Service
 public class DefaultCryptoProviderService implements CryptoService
@@ -24,9 +25,8 @@ public class DefaultCryptoProviderService implements CryptoService
     // TODO: 24.01.2024 определиться с ключами для контейнеров и создавать cipher бинами, чтобы переиспользовать их.
     //  Хотя если ключи разные - переиспользовать не выйдет
 
-
-    @Value("${crypto.hash.algorithm:MD5}")
-    private final String hashAlgorithm;
+    private final MessageDigest messageDigest;
+    private final SecretKeyFactory secretKeyFactory;
 
     @Value("${crypto.encode.algorithm:Blowfish}")
     private final String encodeAlgorithm;
@@ -39,7 +39,7 @@ public class DefaultCryptoProviderService implements CryptoService
         SecretKeySpec key = new SecretKeySpec(keyBytes, encodeAlgorithm);
 
         try {
-            Cipher cipher = Cipher.getInstance("Blowfish");
+            Cipher cipher = Cipher.getInstance(encodeAlgorithm);
 
             cipher.init(Cipher.ENCRYPT_MODE, key);
 
@@ -57,21 +57,15 @@ public class DefaultCryptoProviderService implements CryptoService
     @Override
     public String getMd5HashFor(InputStream inputStream) throws IOException
     {
-        try
+        var buffer = new byte[8192];
+        int read;
+        try(inputStream)
         {
-            var md = MessageDigest.getInstance(hashAlgorithm);
-            var buffer = new byte[8192];
-            int read;
-            try(inputStream)
-            {
-                while ((read = inputStream.read(buffer)) > 0)
-                    md.update(buffer, 0, read);
-            }
-            byte[] digest = md.digest();
-            return bytesToHex(digest);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            while ((read = inputStream.read(buffer)) > 0)
+                messageDigest.update(buffer, 0, read);
         }
+        byte[] digest = messageDigest.digest();
+        return bytesToHex(digest);
     }
 
     @Override
@@ -80,15 +74,14 @@ public class DefaultCryptoProviderService implements CryptoService
         try
         {
             PBEKeySpec spec = new PBEKeySpec(password);
-            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-            return skf.generateSecret(spec).getEncoded();
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e)
+            return secretKeyFactory.generateSecret(spec)
+                    .getEncoded();
+        } catch (InvalidKeySpecException e)
         {
             throw new RuntimeException(e);
         }
 
     }
-
 
     private static String bytesToHex(byte[] bytes)
     {

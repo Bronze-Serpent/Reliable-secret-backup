@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.function.Supplier;
 
 
 @RequiredArgsConstructor
@@ -17,8 +18,7 @@ import java.util.Collections;
 public class GoogleDriveCloudService implements CloudService
 {
 
-    private final Drive service;
-
+    private final Supplier<Drive> googleDriveSupplier;
 
     @Override
     public void MoveFileToFolder(String newFolderId, String fileId)
@@ -26,7 +26,7 @@ public class GoogleDriveCloudService implements CloudService
         try
         {
             // Retrieve the existing parents to remove
-            File file = service.files().get(fileId)
+            File file = googleDriveSupplier.get().files().get(fileId)
                     .setFields("parents")
                     .execute();
             StringBuilder previousParents = new StringBuilder();
@@ -36,7 +36,7 @@ public class GoogleDriveCloudService implements CloudService
             }
 
             // Move the file to the new folder
-            service.files().update(fileId, null)
+            googleDriveSupplier.get().files().update(fileId, null)
                     .setAddParents(newFolderId)
                     .setRemoveParents(previousParents.toString())
                     .setFields("id, parents")
@@ -56,7 +56,7 @@ public class GoogleDriveCloudService implements CloudService
     {
         try
         {
-            return service.files().get(fileId)
+            return googleDriveSupplier.get().files().get(fileId)
                     .executeMediaAsInputStream();
         }
 //        catch (GoogleJsonResponseException e)
@@ -87,7 +87,7 @@ public class GoogleDriveCloudService implements CloudService
             // "text/plain" возможно, вместо null вообще нужно, чтобы был .file
             AbstractInputStreamContent inputStreamMediaContent = new InputStreamContent(null, dataIS);
 
-            File file = service.files().create(fileMetadata, inputStreamMediaContent)
+            File file = googleDriveSupplier.get().files().create(fileMetadata, inputStreamMediaContent)
                     .setFields("id")
                     .execute();
             return file.getId();
@@ -110,7 +110,8 @@ public class GoogleDriveCloudService implements CloudService
 
         try
         {
-            File file = service.files().create(fileMetadata)
+            Drive drive = googleDriveSupplier.get();
+            File file = drive.files().create(fileMetadata)
                     .setFields("id")
                     .execute();
             return file.getId();
@@ -120,5 +121,11 @@ public class GoogleDriveCloudService implements CloudService
             throw new RuntimeException(e);
         }
 //        catch (GoogleJsonResponseException e)
+    }
+
+    @Override
+    public void testConnection()
+    {
+        googleDriveSupplier.get();
     }
 }

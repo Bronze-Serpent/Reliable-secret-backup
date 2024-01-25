@@ -33,6 +33,6 @@ build/
 .vscode/
 /.mvn/wrapper/
 /src/main/resources/credentials.json
-/tokens/StoredCredential
+/tokens/
 /src/main/resources/test.txt
 /src/main/resources/заметки

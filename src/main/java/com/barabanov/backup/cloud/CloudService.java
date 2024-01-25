@@ -13,5 +13,7 @@ public interface CloudService
 
     String createFolder(String name, String parentId);
 
+    void testConnection();
+
     // TODO: 24.01.2024 delete
 }

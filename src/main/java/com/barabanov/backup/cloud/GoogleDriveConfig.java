@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.util.List;
+import java.util.function.Supplier;
 
 
 @Configuration
@@ -29,22 +30,38 @@ public class GoogleDriveConfig
 {
 
     @Bean
-    public Drive googleDriveService(
+    public Supplier<Drive> googleDriveSupplier(
+            @Value("${google.drive.credential.path:/credentials.json}") String credentialsFilePath,
+            @Value("${google.drive.tokens.path:tokens/google}") String tokensDirPath,
+            @Value("${google.drive.receiver.port:8888}") int receiverPort,
             @Value("${application.name:Reliable-secret-backup}") String applicationName,
             NetHttpTransport netHttpTransport,
-            JsonFactory jsonFactory,
-            Credential credentials)
+            JsonFactory jsonFactory)
     {
-        return new Drive.Builder(netHttpTransport, jsonFactory, credentials)
-                .setApplicationName(applicationName)
-                .build();
+        return () ->
+        {
+            try {
+                Credential credentials = googleDriveCredentials(
+                        credentialsFilePath,
+                        tokensDirPath,
+                        receiverPort,
+                        netHttpTransport
+                );
+                return new Drive.Builder(netHttpTransport, jsonFactory, credentials)
+                        .setApplicationName(applicationName)
+                        .build();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            // TODO: 25.01.2024 какую-нибудь ошибку тут, чтобы было понятно, что не удалось соединиться с гугл
+        };
     }
 
-    @Bean
-    public Credential googleDriveCredentials(
-            @Value("${google.drive.credential.path:/credentials.json}") String credentialsFilePath,
-            @Value("${google.drive.tokens.path:tokens}") String tokensDirPath,
-            @Value("${google.drive.receiver.port:8888}") int receiverPort,
+
+    private Credential googleDriveCredentials(
+            String credentialsFilePath,
+            String tokensDirPath,
+            int receiverPort,
             NetHttpTransport netHttpTransport)
 
             throws IOException
@@ -87,7 +104,7 @@ public class GoogleDriveConfig
 
 
     @Bean
-    public NetHttpTransport netHttpTransport() throws GeneralSecurityException, IOException
+    public NetHttpTransport googleNetHttpTransport() throws GeneralSecurityException, IOException
     {
         return GoogleNetHttpTransport.newTrustedTransport();
     }
