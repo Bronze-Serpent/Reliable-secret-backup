@@ -5,15 +5,22 @@ import java.io.InputStream;
 
 public interface CloudService
 {
-    void MoveFileToFolder(String newFolderId, String fileId);
+    void authorize();
 
     InputStream downloadFile(String fileId);
 
     String uploadFile(String folderId, String fileName, InputStream dataIS);
 
+    void delete(String fileId);
+
+    void update(String fileId, String filepath);
+
+    void MoveFileToFolder(String newFolderId, String fileId);
+
     String createFolder(String name, String parentId);
 
-    void authorize();
+    String findFolderWithName(String name, String parentId);
 
-    void delete(String fileId);
+    String findFileFile(String name);
+
 }

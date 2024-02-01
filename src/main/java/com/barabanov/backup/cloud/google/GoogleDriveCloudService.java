@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.List;
 import java.util.function.Supplier;
 
 
@@ -57,7 +58,9 @@ public class GoogleDriveCloudService implements CloudService
     {
         try
         {
-            return googleDriveSupplier.get().files().get(fileId)
+            return googleDriveSupplier.get()
+                    .files()
+                    .get(fileId)
                     .executeMediaAsInputStream();
         }
 //        catch (GoogleJsonResponseException e)
@@ -127,6 +130,49 @@ public class GoogleDriveCloudService implements CloudService
 
 
     @Override
+    public String findFolderWithName(String name, String parentId)
+    {
+        try
+        {
+            Drive drive = googleDriveSupplier.get();
+            List<File> fileList = drive.files().list()
+                    .setQ("mimeType = 'application/vnd.google-apps.folder' and name = '" + name + "'")
+                    .execute()
+                    .getFiles();
+
+            if (fileList.isEmpty())
+                return null;
+            else
+                return fileList.get(0).getId();
+        } catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public String findFileFile(String name)
+    {
+        try
+        {
+            Drive drive = googleDriveSupplier.get();
+            List<File> fileList = drive.files().list()
+                    .setQ("name = '" + name + "'")
+                    .execute()
+                    .getFiles();
+
+            if (fileList.isEmpty())
+                return null;
+            else
+                return fileList.get(0).getId();
+        } catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @Override
     public void authorize()
     {
         googleDriveSupplier.get();
@@ -147,6 +193,19 @@ public class GoogleDriveCloudService implements CloudService
         catch (IOException e)
         {
             System.err.println("Unable to move file: " + e);
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @Override
+    public void update(String fileId, String filepath)
+    {
+        Drive drive = googleDriveSupplier.get();
+        try {
+            File file = drive.files().get(fileId).execute();
+            drive.files().update(fileId, file);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

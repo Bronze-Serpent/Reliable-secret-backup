@@ -35,4 +35,4 @@ build/
 /src/main/resources/credentials.json
 /tokens/
 /src/main/resources/test.txt
-/src/main/resources/notes
+/notes
