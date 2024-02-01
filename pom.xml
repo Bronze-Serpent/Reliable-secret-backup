@@ -9,14 +9,17 @@
 		<version>3.2.2</version>
 	</parent>
 
+
 	<groupId>com.barabanov</groupId>
 	<artifactId>Reliable-secret-backup</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Reliable-secret-backup</name>
 
+
 	<properties>
 		<java.version>21</java.version>
 	</properties>
+
 
 	<dependencies>
 		<dependency>
@@ -35,12 +38,7 @@
 			<optional>true</optional>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-
+		<!--		google drive / gmail		-->
 		<dependency>
 			<groupId>com.google.api-client</groupId>
 			<artifactId>google-api-client</artifactId>
@@ -61,13 +59,24 @@
 			<artifactId>google-auth-library-oauth2-http</artifactId>
 			<version>1.22.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
+		<!--		google drive / gmail		-->
 
+		<dependency>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
+
 
 	<build>
 		<plugins>

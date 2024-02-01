@@ -1,5 +1,6 @@
-package com.barabanov.backup.cloud;
+package com.barabanov.backup.cloud.google;
 
+import com.barabanov.backup.cloud.CloudService;
 import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
@@ -100,6 +101,7 @@ public class GoogleDriveCloudService implements CloudService
         }
     }
 
+
     @Override
     public String createFolder(String name, String parentId)
     {
@@ -123,9 +125,30 @@ public class GoogleDriveCloudService implements CloudService
 //        catch (GoogleJsonResponseException e)
     }
 
+
     @Override
-    public void testConnection()
+    public void authorize()
     {
         googleDriveSupplier.get();
     }
+
+
+    @Override
+    public void delete(String fileId)
+    {
+        try
+        {
+            googleDriveSupplier.get()
+                    .files()
+                    .delete(fileId)
+                    .execute();
+        }
+//        catch (GoogleJsonResponseException e)
+        catch (IOException e)
+        {
+            System.err.println("Unable to move file: " + e);
+            throw new RuntimeException(e);
+        }
+    }
+
 }

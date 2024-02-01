@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/tables/users-1.0.sql
+  - include:
+      file: db/changelog/tables/file-1.0.sql
+  - include:
+      file: db/changelog/tables/google_drive_file-1.0.sql

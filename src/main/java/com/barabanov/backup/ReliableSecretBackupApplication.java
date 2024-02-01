@@ -23,7 +23,7 @@ public class ReliableSecretBackupApplication
 		try {
 			bean.sendHtmlEmail(
 					"pbarabanov04@gmail.com",
-					"Мой тема",
+					"Моя тема",
 					"<p>Текст <b>html</b></p>");
 		} catch (MessagingException e) {
 			throw new RuntimeException(e);

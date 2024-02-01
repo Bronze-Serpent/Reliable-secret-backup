@@ -13,7 +13,7 @@ public interface CloudService
 
     String createFolder(String name, String parentId);
 
-    void testConnection();
+    void authorize();
 
-    // TODO: 24.01.2024 delete
+    void delete(String fileId);
 }
