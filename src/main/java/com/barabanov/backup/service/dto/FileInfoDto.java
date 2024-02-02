@@ -2,6 +2,7 @@ package com.barabanov.backup.service.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
@@ -19,5 +20,6 @@ public class FileInfoDto
     String md5;
     Boolean isTracked;
     Long size;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate createdDate;
 }

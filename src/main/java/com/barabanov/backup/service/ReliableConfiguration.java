@@ -11,6 +11,9 @@ public class ReliableConfiguration
     @Bean
     public ObjectMapper jaksonObjectMapper()
     {
-        return new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+
+        return objectMapper;
     }
 }

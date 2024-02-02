@@ -31,9 +31,9 @@ public class DefaultCryptoProviderService implements CryptoService
 
 
     @Override
-    public InputStream encrypt(char[] password, InputStream is)
+    public InputStream encrypt(char[] pass, InputStream is)
     {
-        byte[] keyBytes = generatePasswordHash(password);
+        byte[] keyBytes = generatePasswordHash(pass);
         SecretKeySpec key = new SecretKeySpec(keyBytes, encodeAlgorithm);
 
         try {
@@ -48,8 +48,20 @@ public class DefaultCryptoProviderService implements CryptoService
     }
 
     @Override
-    public InputStream decrypt(char[] keyStr, InputStream is) {
-        return null;
+    public InputStream decrypt(char[] pass, InputStream is)
+    {
+        byte[] keyBytes = generatePasswordHash(pass);
+        SecretKeySpec key = new SecretKeySpec(keyBytes, encodeAlgorithm);
+
+        try {
+            Cipher cipher = Cipher.getInstance(encodeAlgorithm);
+
+            cipher.init(Cipher.DECRYPT_MODE, key);
+
+            return new CipherInputStream(is, cipher);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -71,7 +83,8 @@ public class DefaultCryptoProviderService implements CryptoService
     {
         try
         {
-            PBEKeySpec spec = new PBEKeySpec(password);
+            // TODO: 02.02.2024 убрать хардкод тут
+            PBEKeySpec spec = new PBEKeySpec(password, new byte[16], 2, 32);
             return secretKeyFactory.generateSecret(spec)
                     .getEncoded();
         } catch (InvalidKeySpecException e)

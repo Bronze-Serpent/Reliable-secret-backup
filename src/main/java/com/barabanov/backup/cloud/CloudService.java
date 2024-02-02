@@ -7,20 +7,20 @@ public interface CloudService
 {
     void authorize();
 
-    InputStream downloadFile(String fileId);
+    InputStream downloadFile(String cloudId);
 
-    String uploadFile(String folderId, String fileName, InputStream dataIS);
+    String uploadFile(String cloudFolderId, String fileName, InputStream dataIS);
 
-    void delete(String fileId);
+    void delete(String cloudId);
 
-    void update(String fileId, String filepath);
+    void update(String cloudId, InputStream is);
 
-    void MoveFileToFolder(String newFolderId, String fileId);
+    void moveFileToFolder(String folderCloudId, String fileCloudId);
 
-    String createFolder(String name, String parentId);
+    String createFolder(String name, String parentCloudId);
 
-    String findFolderWithName(String name, String parentId);
+    String findFolderWithName(String name, String parentCloudId);
 
-    String findFileFile(String name);
+    String findFileCloudId(String name);
 
 }

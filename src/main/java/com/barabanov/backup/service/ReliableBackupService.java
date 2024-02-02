@@ -7,7 +7,9 @@ public interface ReliableBackupService
 
     void deleteFile(Long fileId);
 
-    void updateFile(Long fileId, String filePath);
+    void createAppDataFile(char[] pass);
+
+    void createMasterFile(char[] pass);
 
     // показ файлов, проверка их периодическая
 }

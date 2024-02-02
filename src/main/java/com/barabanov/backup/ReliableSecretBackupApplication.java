@@ -1,6 +1,5 @@
 package com.barabanov.backup;
 
-import com.barabanov.backup.cloud.CloudService;
 import com.barabanov.backup.service.ReliableBackupService;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -18,6 +17,18 @@ public class ReliableSecretBackupApplication
 		// для использования awt
 		builder.headless(false);
 		ConfigurableApplicationContext context = builder.run(args);
+
+		ReliableBackupService service = context.getBean(ReliableBackupService.class);
+
+		char[] pass = "password".toCharArray();
+
+		service.deleteFile(null);
+
+//		service.createAppDataFile(pass);
+//		service.createMasterFile(pass);
+//
+//		service.saveFile(pass, "src/main/resources/test.txt", true);
+//		service.saveFile(pass, "src/main/resources/test.txt", true);
 
 
 //		EmailServiceImpl bean = context.getBean(EmailServiceImpl.class);

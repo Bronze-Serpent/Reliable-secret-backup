@@ -2,6 +2,7 @@ package com.barabanov.backup.cloud.google;
 
 import com.barabanov.backup.cloud.CloudService;
 import com.google.api.client.http.AbstractInputStreamContent;
+import com.google.api.client.http.FileContent;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
@@ -19,11 +20,106 @@ import java.util.function.Supplier;
 @Service
 public class GoogleDriveCloudService implements CloudService
 {
-
     private final Supplier<Drive> googleDriveSupplier;
 
     @Override
-    public void MoveFileToFolder(String newFolderId, String fileId)
+    public void authorize()
+    {
+        googleDriveSupplier.get();
+    }
+
+
+    @Override
+    public InputStream downloadFile(String cloudId)
+    {
+        try
+        {
+            return googleDriveSupplier.get()
+                    .files()
+                    .get(cloudId)
+                    .executeMediaAsInputStream();
+        }
+//        catch (GoogleJsonResponseException e)
+//        {
+//            // TODO(developer) - handle error appropriately
+//            System.err.println("Unable to move file: " + e.getDetails());
+//            throw new RuntimeException(e);
+//        }
+        catch (IOException e)
+        {
+            System.err.println("Unable to move file: " + e);
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @Override
+    public String uploadFile(String cloudFolderId, String fileName, InputStream dataIS)
+    {
+        // File's metadata.
+        File fileMetadata = new File();
+        fileMetadata.setParents(Collections.singletonList(cloudFolderId));
+        fileMetadata.setName(fileName);
+        fileMetadata.setMimeType("application/octet-stream"); // application/octet-stream - вроде необработанные бинарные данные
+
+        try(dataIS)
+        {
+            // TODO: 02.02.2024 "text/plain" возможно, вместо null вообще нужно, чтобы был .file
+            AbstractInputStreamContent inputStreamMediaContent = new InputStreamContent(null, dataIS);
+
+            File file = googleDriveSupplier.get().files().create(fileMetadata, inputStreamMediaContent)
+                    .setFields("id")
+                    .execute();
+            return file.getId();
+        }
+        //        catch (GoogleJsonResponseException e)
+        catch (IOException e)
+        {
+            System.err.println("Unable to move file: " + e);
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @Override
+    public void delete(String fileId)
+    {
+        try
+        {
+            googleDriveSupplier.get()
+                    .files()
+                    .delete(fileId)
+                    .execute();
+        }
+//        catch (GoogleJsonResponseException e)
+        catch (IOException e)
+        {
+            System.err.println("Unable to move file: " + e);
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @Override
+    public void update(String cloudFileId, InputStream newFileContent)
+    {
+        Drive drive = googleDriveSupplier.get();
+        try
+        {
+            File  file = new File();
+            AbstractInputStreamContent inputStreamMediaContent = new InputStreamContent(null, newFileContent);
+
+            drive.files()
+                    .update(cloudFileId, file, inputStreamMediaContent)
+                    .execute();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @Override
+    public void moveFileToFolder(String newFolderId, String fileId)
     {
         try
         {
@@ -51,59 +147,6 @@ public class GoogleDriveCloudService implements CloudService
             throw new RuntimeException(e);
         }
     }
-
-
-    @Override
-    public InputStream downloadFile(String fileId)
-    {
-        try
-        {
-            return googleDriveSupplier.get()
-                    .files()
-                    .get(fileId)
-                    .executeMediaAsInputStream();
-        }
-//        catch (GoogleJsonResponseException e)
-//        {
-//            // TODO(developer) - handle error appropriately
-//            System.err.println("Unable to move file: " + e.getDetails());
-//            throw new RuntimeException(e);
-//        }
-        catch (IOException e)
-        {
-            System.err.println("Unable to move file: " + e);
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    @Override
-    public String uploadFile(String folderId, String fileName, InputStream dataIS)
-    {
-        // File's metadata.
-        File fileMetadata = new File();
-        fileMetadata.setParents(Collections.singletonList(folderId));
-        fileMetadata.setName(fileName);
-        fileMetadata.setMimeType("application/octet-stream"); // application/octet-stream - вроде необработанные бинарные данные
-
-        try(dataIS)
-        {
-            // "text/plain" возможно, вместо null вообще нужно, чтобы был .file
-            AbstractInputStreamContent inputStreamMediaContent = new InputStreamContent(null, dataIS);
-
-            File file = googleDriveSupplier.get().files().create(fileMetadata, inputStreamMediaContent)
-                    .setFields("id")
-                    .execute();
-            return file.getId();
-        }
-        //        catch (GoogleJsonResponseException e)
-        catch (IOException e)
-        {
-            System.err.println("Unable to move file: " + e);
-            throw new RuntimeException(e);
-        }
-    }
-
 
     @Override
     public String createFolder(String name, String parentId)
@@ -150,8 +193,9 @@ public class GoogleDriveCloudService implements CloudService
         }
     }
 
+
     @Override
-    public String findFileFile(String name)
+    public String findFileCloudId(String name)
     {
         try
         {
@@ -170,44 +214,4 @@ public class GoogleDriveCloudService implements CloudService
             throw new RuntimeException(e);
         }
     }
-
-
-    @Override
-    public void authorize()
-    {
-        googleDriveSupplier.get();
-    }
-
-
-    @Override
-    public void delete(String fileId)
-    {
-        try
-        {
-            googleDriveSupplier.get()
-                    .files()
-                    .delete(fileId)
-                    .execute();
-        }
-//        catch (GoogleJsonResponseException e)
-        catch (IOException e)
-        {
-            System.err.println("Unable to move file: " + e);
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    @Override
-    public void update(String fileId, String filepath)
-    {
-        Drive drive = googleDriveSupplier.get();
-        try {
-            File file = drive.files().get(fileId).execute();
-            drive.files().update(fileId, file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 }
