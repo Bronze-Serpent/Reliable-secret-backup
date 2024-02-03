@@ -5,13 +5,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import java.io.FileNotFoundException;
-
 
 @SpringBootApplication
 public class ReliableSecretBackupApplication
 {
-	public static void main(String[] args) throws FileNotFoundException
+	public static void main(String[] args)
 	{
 		SpringApplicationBuilder builder = new SpringApplicationBuilder(ReliableSecretBackupApplication.class);
 		// для использования awt
@@ -22,14 +20,26 @@ public class ReliableSecretBackupApplication
 
 		char[] pass = "password".toCharArray();
 
+//		service.authorizeInCloud();
+//		service.createInitCloudElements(pass);
 
-//		service.createAppDataFile(pass);
-//		service.createMasterFile(pass);
+//		service.saveFile(pass, "src/main/resources/test.txt", true);
+//		service.saveFile(pass, "src/main/resources/pic_test.png", true);
 
-		service.saveFile(pass, "src/main/resources/test.txt", true);
-		service.saveFile(pass, "src/main/resources/test.txt", true);
+		service.showAllFilesInfo(pass).forEach(System.out::println);
+
+		service.downloadFile(pass, 0L, "downloaded/");
+		service.downloadFile(pass, 1L, "downloaded/");
+	}
 
 
+
+
+
+
+
+	private static void emailTest()
+	{
 //		EmailServiceImpl bean = context.getBean(EmailServiceImpl.class);
 //		try {
 //			bean.sendHtmlEmail(
@@ -39,17 +49,6 @@ public class ReliableSecretBackupApplication
 //		} catch (MessagingException e) {
 //			throw new RuntimeException(e);
 //		}
-
-//		CloudService cloudService = context.getBean(CloudService.class);
-//		cloudService.testConnection();
-
-//		String folderId = cloudService.createFolder("my folder", null);
-//		String anotherFolderId = cloudService.createFolder("another folder", folderId);
-//
-//		String file1 = cloudService.uploadFile(folderId, "file1", new FileInputStream("src/main/resources/test.txt"));
-//		String file1_1 = cloudService.uploadFile(anotherFolderId, "file1_1", new FileInputStream("src/main/resources/test.txt"));
-//
-//		cloudService.MoveFileToFolder(folderId, file1_1);
 	}
 
 }

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -22,16 +23,16 @@ import java.util.List;
 @Service
 public class ReliableBackupServiceImpl implements ReliableBackupService
 {
-    @Value("${application.backup.app.folder.name}")
+    @Value("${application.backup.app.folder.name:Reliable-backup}")
     private final String APP_FOLDER_NAME;
 
-    @Value("${application.backup.storage.folder.name}")
+    @Value("${application.backup.storage.folder.name:Files}")
     private final String STORAGE_FOLDER_NAME;
 
-    @Value("${application.backup.master.file.name}")
+    @Value("${application.backup.master.file.name:master-file}")
     private final String MASTER_FILE_NAME;
 
-    @Value("${application.backup.app.info.file.name}")
+    @Value("${application.backup.app.info.file.name:app-info}")
     private final String APP_INFO_FILE_NAME;
 
     private final CloudService cloudService;
@@ -40,8 +41,15 @@ public class ReliableBackupServiceImpl implements ReliableBackupService
 
     private String appDataCloudId;
     private String masterFileCloudId;
-    private String appCloudFolderId;
+    private String appFolderCloudId;
     private String storageCloudFolderId;
+
+
+    @Override
+    public void authorizeInCloud()
+    {
+        cloudService.authorize();
+    }
 
 
     @Override
@@ -64,8 +72,10 @@ public class ReliableBackupServiceImpl implements ReliableBackupService
 
 
     @Override
-    public void createAppDataFiles(char[] pass)
+    public void createInitCloudElements(char[] pass)
     {
+        this.appFolderCloudId = cloudService.createFolder(APP_FOLDER_NAME, null);
+        this.storageCloudFolderId = cloudService.createFolder(STORAGE_FOLDER_NAME, appFolderCloudId);
         try
         {
             String appDataAsJson = objectmapper.writeValueAsString(new StoredAppDataDto(0L));
@@ -86,9 +96,28 @@ public class ReliableBackupServiceImpl implements ReliableBackupService
         return masterFile.getFilesInfo();
     }
 
-    public void downloadFile(Long id, String directory)
-    {
 
+    @Override
+    public void downloadFile(char[] pass, Long fileId, String fileDirectory)
+    {
+        MasterFile masterFile = getObjectFromCloud(pass, getMasterFileCloudId(), MasterFile.class);
+        List<FileInfoDto> idFileInfoList = masterFile.getFilesInfo().stream()
+                .filter(fileInfoDto -> fileInfoDto.getId().equals(fileId))
+                .toList();
+        if (idFileInfoList.size() == 1)
+        {
+            FileInfoDto fileInfo = idFileInfoList.get(0);
+            InputStream decryptedIS = cryptoService.decrypt(pass, cloudService.downloadFile(fileInfo.getDiskId()));
+            try
+            {
+                File targetFile = new File(fileDirectory + fileInfo.getName());
+                Files.createDirectories(targetFile.getAbsoluteFile().toPath().getParent());
+
+                Files.copy(decryptedIS, targetFile.toPath());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
 
@@ -174,10 +203,10 @@ public class ReliableBackupServiceImpl implements ReliableBackupService
 
     private String getAppFolderId()
     {
-        if (appCloudFolderId == null)
-            appCloudFolderId = cloudService.findFolderWithName(APP_FOLDER_NAME, null);
+        if (appFolderCloudId == null)
+            appFolderCloudId = cloudService.findFolderWithName(APP_FOLDER_NAME, null);
 
-        return appCloudFolderId;
+        return appFolderCloudId;
     }
 
     private String getStorageFolderId()

@@ -7,7 +7,7 @@ spring:
     host: smtp.gmail.com
     port: 465
     username: reliablesecretbackup@gmail.com
-    password:
+    password: pcae ezhv ahog jyav
     test-connection: false # проверка подключения при старте приложения
     properties: # эта секция только для gmail
       mail:
@@ -18,8 +18,8 @@ spring:
           ssl:
             enable: true
 
-application.backup:
-  app.folder.name: Reliable-backup
-  storage.folder.name: Files
-  master.file.name: master-file
-  app.info.file.name: app-info
+#application.backup:
+#  app.folder.name:
+#  storage.folder.name:
+#  master.file.name:
+#  app.info.file.name:
