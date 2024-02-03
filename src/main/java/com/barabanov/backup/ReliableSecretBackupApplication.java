@@ -22,13 +22,12 @@ public class ReliableSecretBackupApplication
 
 		char[] pass = "password".toCharArray();
 
-		service.deleteFile(null);
 
 //		service.createAppDataFile(pass);
 //		service.createMasterFile(pass);
-//
-//		service.saveFile(pass, "src/main/resources/test.txt", true);
-//		service.saveFile(pass, "src/main/resources/test.txt", true);
+
+		service.saveFile(pass, "src/main/resources/test.txt", true);
+		service.saveFile(pass, "src/main/resources/test.txt", true);
 
 
 //		EmailServiceImpl bean = context.getBean(EmailServiceImpl.class);

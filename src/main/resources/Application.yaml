@@ -7,7 +7,7 @@ spring:
     host: smtp.gmail.com
     port: 465
     username: reliablesecretbackup@gmail.com
-    password: pcae ezhv ahog jyav
+    password:
     test-connection: false # проверка подключения при старте приложения
     properties: # эта секция только для gmail
       mail:

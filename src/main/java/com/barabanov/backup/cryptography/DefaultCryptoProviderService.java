@@ -29,6 +29,15 @@ public class DefaultCryptoProviderService implements CryptoService
     @Value("${crypto.encode.algorithm:Blowfish}")
     private final String encodeAlgorithm;
 
+    @Value("${crypto.pas.iterations:10}")
+    private final int iterations;
+
+    @Value("${crypto.key.length:32}")
+    private final int keyLength;
+
+    @Value("${crypto.pas.salt:asdf}")
+    private final String salt;
+
 
     @Override
     public InputStream encrypt(char[] pass, InputStream is)
@@ -83,15 +92,13 @@ public class DefaultCryptoProviderService implements CryptoService
     {
         try
         {
-            // TODO: 02.02.2024 убрать хардкод тут
-            PBEKeySpec spec = new PBEKeySpec(password, new byte[16], 2, 32);
+            PBEKeySpec spec = new PBEKeySpec(password, salt.getBytes(), iterations, keyLength);
             return secretKeyFactory.generateSecret(spec)
                     .getEncoded();
         } catch (InvalidKeySpecException e)
         {
             throw new RuntimeException(e);
         }
-
     }
 
     private static String bytesToHex(byte[] bytes)

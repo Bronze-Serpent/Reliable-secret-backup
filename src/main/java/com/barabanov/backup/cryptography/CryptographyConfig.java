@@ -21,7 +21,7 @@ public class CryptographyConfig
     }
 
     @Bean
-    public SecretKeyFactory secretKeyFactory(@Value("${crypto.pas.to.key.algorithm:PBKDF2WithHmacSHA1}") String pswdToKeyAlgorithm)
+    public SecretKeyFactory secretKeyFactory(@Value("${crypto.pas.algorithm:PBKDF2WithHmacSHA1}") String pswdToKeyAlgorithm)
             throws NoSuchAlgorithmException
     {
         return SecretKeyFactory.getInstance(pswdToKeyAlgorithm);

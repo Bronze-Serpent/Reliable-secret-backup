@@ -1,15 +1,19 @@
 package com.barabanov.backup.service;
 
 
+import com.barabanov.backup.service.dto.FileInfoDto;
+
+import java.util.List;
+
 public interface ReliableBackupService
 {
-    void saveFile(char[] keyStr, String filePath, Boolean isTracked);
+    void saveFile(char[] pass, String filePath, Boolean isTracked);
 
-    void deleteFile(Long fileId);
+    void createAppDataFiles(char[] pass);
 
-    void createAppDataFile(char[] pass);
+    List<FileInfoDto> showAllFilesInfo(char[] pass);
 
-    void createMasterFile(char[] pass);
+    public void downloadFile(Long id, String directory);
 
-    // показ файлов, проверка их периодическая
+    // проверка файлов периодическая
 }

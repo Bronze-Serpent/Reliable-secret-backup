@@ -15,9 +15,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @RequiredArgsConstructor
@@ -36,7 +34,6 @@ public class ReliableBackupServiceImpl implements ReliableBackupService
     @Value("${application.backup.app.info.file.name}")
     private final String APP_INFO_FILE_NAME;
 
-
     private final CloudService cloudService;
     private final CryptoService cryptoService;
     private final ObjectMapper objectmapper;
@@ -51,90 +48,80 @@ public class ReliableBackupServiceImpl implements ReliableBackupService
     public void saveFile(char[] pass, String filePath, Boolean isTracked)
     {
         File file = new File(filePath);
-        String fileName = file.getName();
-
-        String uploadedFileId;
-        try(InputStream encryptedIS = cryptoService.encrypt(pass, new FileInputStream(file)))
-        {
-            uploadedFileId = cloudService.uploadFile(getStorageFolderId(), fileName, encryptedIS);
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
+        String uploadedFileId = uploadFile(pass, file);
 
         // обновление файлов с данными приложения
         StoredAppDataDto appDataDto = getObjectFromCloud(pass, getAppDataCloudId(), StoredAppDataDto.class);
-        MasterFile storedFilesInfoList = getObjectFromCloud(pass, getMasterFileCloudId(), MasterFile.class);
+        MasterFile masterFile = getObjectFromCloud(pass, getMasterFileCloudId(), MasterFile.class);
 
+        FileInfoDto fileInfoDto = createFileInfo(file, appDataDto.getCurrFileId(), uploadedFileId, isTracked);
+        masterFile.getFilesInfo()
+                .add(fileInfoDto);
+        appDataDto.setCurrFileId(appDataDto.getCurrFileId() + 1);
+
+        updateAppFiles(pass, appDataDto, masterFile);
+    }
+
+
+    @Override
+    public void createAppDataFiles(char[] pass)
+    {
+        try
+        {
+            String appDataAsJson = objectmapper.writeValueAsString(new StoredAppDataDto(0L));
+            createFile(pass, APP_INFO_FILE_NAME, appDataAsJson);
+
+            String masterFileAsJson = objectmapper.writeValueAsString(new MasterFile(Collections.emptyList()));
+            createFile(pass, MASTER_FILE_NAME, masterFileAsJson);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @Override
+    public List<FileInfoDto> showAllFilesInfo(char[] pass)
+    {
+        MasterFile masterFile = getObjectFromCloud(pass, getMasterFileCloudId(), MasterFile.class);
+        return masterFile.getFilesInfo();
+    }
+
+    public void downloadFile(Long id, String directory)
+    {
+
+    }
+
+
+    private void updateAppFiles(char[] pass, StoredAppDataDto appDataDto, MasterFile masterFile)
+    {
+        try
+        {
+            cloudService.update(getAppDataCloudId(), cryptoService.encrypt(pass, new ByteArrayInputStream(objectmapper.writeValueAsString(appDataDto).getBytes())));
+            cloudService.update(getMasterFileCloudId(), cryptoService.encrypt(pass, new ByteArrayInputStream(objectmapper.writeValueAsString(masterFile).getBytes())));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    private FileInfoDto createFileInfo(File file, Long currId, String cloudId, Boolean isTracked)
+    {
         try(FileInputStream fileIS = new FileInputStream(file))
         {
-            FileInfoDto fileInfoDto = FileInfoDto.builder()
-                    .id(appDataDto.getCurrFileId())
-                    .diskId(uploadedFileId)
-                    .name(fileName)
+            return FileInfoDto.builder()
+                    .id(currId)
+                    .diskId(cloudId)
+                    .name(file.getName())
                     .md5(cryptoService.getMd5HashFor(fileIS))
-                    .size(file.length() / 1024)
+                    .size(Math.round(file.length() * 1.0 / 1024))
                     .createdDate(LocalDate.now())
                     .isTracked(isTracked)
                     .build();
-
-            storedFilesInfoList.getFilesInfo().add(fileInfoDto);
-            appDataDto.setCurrFileId(appDataDto.getCurrFileId() + 1);
         } catch (IOException e)
         {
             throw new RuntimeException(e);
         }
-
-        try
-        {
-            System.out.println(objectmapper.writeValueAsString(appDataDto));
-            cloudService.update(getAppDataCloudId(), new ByteArrayInputStream(objectmapper.writeValueAsString(appDataDto).getBytes()));
-            cloudService.update(getMasterFileCloudId(), new ByteArrayInputStream(objectmapper.writeValueAsString(storedFilesInfoList).getBytes()));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
     }
-
-
-    @Override
-    public void deleteFile(Long fileId)
-    {
-        InputStream encryptStream = cryptoService.encrypt("password".toCharArray(), new ByteArrayInputStream("{\"currFileId\":1}".getBytes()));
-        InputStream decrypt = cryptoService.decrypt("password".toCharArray(), encryptStream);
-        BufferedReader fileBf = new BufferedReader(new InputStreamReader(decrypt));
-        try {
-            System.out.println(fileBf.readLine());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void createAppDataFile(char[] pass)
-    {
-        try
-        {
-            String dataAsJson = objectmapper.writeValueAsString(new StoredAppDataDto(0L));
-            createFile(pass, APP_INFO_FILE_NAME, dataAsJson);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    @Override
-    public void createMasterFile(char[] pass)
-    {
-        try
-        {
-            String dataAsJson = objectmapper.writeValueAsString(new MasterFile(Collections.emptyList()));
-            createFile(pass, MASTER_FILE_NAME, dataAsJson);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 
     private <T> T getObjectFromCloud(char[] pass, String cloudId, Class<T> objClazz)
     {
@@ -147,6 +134,17 @@ public class ReliableBackupServiceImpl implements ReliableBackupService
         }
     }
 
+    private String uploadFile(char[] pass, File file)
+    {
+        try(InputStream encryptedIS = cryptoService.encrypt(pass, new FileInputStream(file)))
+        {
+            return cloudService.uploadFile(getStorageFolderId(), file.getName(), encryptedIS);
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
 
     private void createFile(char[] pass, String fileName, String dataAsJson)
     {
