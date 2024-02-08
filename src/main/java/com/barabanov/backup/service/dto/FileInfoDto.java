@@ -16,7 +16,7 @@ public class FileInfoDto
 {
     String name;
     Long id;
-    String diskId;
+    String cloudId;
     String md5;
     Boolean isTracked;
     Long size;

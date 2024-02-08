@@ -1,8 +1,4 @@
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5433/reliable_secret_backup
-    password: pass
-    username: postgres
   mail:
     host: smtp.gmail.com
     port: 465

@@ -20,16 +20,20 @@ public class ReliableSecretBackupApplication
 
 		char[] pass = "password".toCharArray();
 
-//		service.authorizeInCloud();
+		service.authorizeInCloud();
 //		service.createInitCloudElements(pass);
 
-//		service.saveFile(pass, "src/main/resources/test.txt", true);
-//		service.saveFile(pass, "src/main/resources/pic_test.png", true);
+//		service.saveFile(pass, "src/main/resources/test_1.txt", true);
+//		service.saveFile(pass, "src/main/resources/test_2.txt", true);
+//		service.saveFile(pass, "src/main/resources/pic_test.png", false);
 
 		service.showAllFilesInfo(pass).forEach(System.out::println);
 
-		service.downloadFile(pass, 0L, "downloaded/");
-		service.downloadFile(pass, 1L, "downloaded/");
+//		service.downloadFile(pass, 0L, "downloaded/");
+//		service.downloadFile(pass, 1L, "downloaded/");
+//		service.downloadFile(pass, 2L, "downloaded/");
+
+		service.checkAllTrackedFiles(pass);
 	}
 
 

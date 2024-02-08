@@ -15,6 +15,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -107,7 +108,7 @@ public class ReliableBackupServiceImpl implements ReliableBackupService
         if (idFileInfoList.size() == 1)
         {
             FileInfoDto fileInfo = idFileInfoList.get(0);
-            InputStream decryptedIS = cryptoService.decrypt(pass, cloudService.downloadFile(fileInfo.getDiskId()));
+            InputStream decryptedIS = cryptoService.decrypt(pass, cloudService.downloadFile(fileInfo.getCloudId()));
             try
             {
                 File targetFile = new File(fileDirectory + fileInfo.getName());
@@ -118,6 +119,36 @@ public class ReliableBackupServiceImpl implements ReliableBackupService
                 throw new RuntimeException(e);
             }
         }
+    }
+
+
+    // считываю Master-file и файлы по одному считываю по id,
+    // их расшифровываю, вычисляю хэш и сравниваю с тем, что хранится в master-file
+    @Override
+    public List<FileInfoDto> checkAllTrackedFiles(char[] pass)
+    {
+        MasterFile masterFile = getObjectFromCloud(pass, getMasterFileCloudId(), MasterFile.class);
+        List<FileInfoDto> notVerified = new ArrayList<>();
+
+        for (FileInfoDto fileInfoDto : masterFile.getFilesInfo())
+        {
+            if (fileInfoDto.getIsTracked())
+            {
+                String cloudId = fileInfoDto.getCloudId();
+                try(InputStream fileIO = cryptoService.decrypt(pass, cloudService.downloadFile(cloudId)))
+                {
+                    String newMd5Hash = cryptoService.getMd5HashFor(fileIO);
+
+                    if(!newMd5Hash.equals(fileInfoDto.getMd5()))
+                        notVerified.add(fileInfoDto);
+                } catch (IOException e)
+                {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        return notVerified;
     }
 
 
@@ -139,7 +170,7 @@ public class ReliableBackupServiceImpl implements ReliableBackupService
         {
             return FileInfoDto.builder()
                     .id(currId)
-                    .diskId(cloudId)
+                    .cloudId(cloudId)
                     .name(file.getName())
                     .md5(cryptoService.getMd5HashFor(fileIS))
                     .size(Math.round(file.length() * 1.0 / 1024))
@@ -156,6 +187,7 @@ public class ReliableBackupServiceImpl implements ReliableBackupService
     {
         try(BufferedReader fileBf = new BufferedReader(new InputStreamReader(cryptoService.decrypt(pass, cloudService.downloadFile(cloudId)))))
         {
+            // TODO: 03.02.2024 тут одной строкой?
             return objectmapper.readValue(fileBf.readLine(), objClazz);
         } catch (IOException e)
         {

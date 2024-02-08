@@ -17,5 +17,5 @@ public interface ReliableBackupService
 
     void downloadFile(char[] pass, Long id, String directory);
 
-    // проверка файлов периодическая
+    List<FileInfoDto> checkAllTrackedFiles(char[] pass);
 }

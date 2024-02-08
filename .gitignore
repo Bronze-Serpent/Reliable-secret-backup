@@ -34,7 +34,8 @@ build/
 /.mvn/wrapper/
 /src/main/resources/credentials.json
 /tokens/
-/src/main/resources/test.txt
+/src/main/resources/test_2.txt
 /notes
 /downloaded/
 /src/main/resources/pic_test.png
+/src/main/resources/test_1.txt
