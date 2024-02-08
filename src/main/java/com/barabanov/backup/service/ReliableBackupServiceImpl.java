@@ -18,6 +18,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.barabanov.backup.service.FileType.ALL;
+import static com.barabanov.backup.service.FileType.TRACKED;
 
 
 @RequiredArgsConstructor
@@ -91,10 +95,21 @@ public class ReliableBackupServiceImpl implements ReliableBackupService
 
 
     @Override
-    public List<FileInfoDto> showAllFilesInfo(char[] pass)
+    public List<FileInfoDto> getFilesInfo(char[] pass, FileType fileType)
     {
         MasterFile masterFile = getObjectFromCloud(pass, getMasterFileCloudId(), MasterFile.class);
-        return masterFile.getFilesInfo();
+        List<FileInfoDto> allFileInfo = masterFile.getFilesInfo();
+
+        if (fileType == ALL)
+            return allFileInfo;
+        if (fileType == TRACKED)
+            return allFileInfo.stream()
+                    .filter(FileInfoDto::getIsTracked)
+                    .collect(Collectors.toList());
+        else
+            return allFileInfo.stream()
+                    .filter(fileInfo-> !fileInfo.getIsTracked())
+                    .collect(Collectors.toList());
     }
 
 

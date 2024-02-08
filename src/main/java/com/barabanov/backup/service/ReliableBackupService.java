@@ -13,7 +13,7 @@ public interface ReliableBackupService
 
     void saveFile(char[] pass, String filePath, Boolean isTracked);
 
-    List<FileInfoDto> showAllFilesInfo(char[] pass);
+    List<FileInfoDto> getFilesInfo(char[] pass, FileType fileType);
 
     void downloadFile(char[] pass, Long id, String directory);
 

@@ -1,12 +1,13 @@
 package com.barabanov.backup;
 
+import com.barabanov.backup.service.FileType;
 import com.barabanov.backup.service.ReliableBackupService;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
 
-@SpringBootApplication
+//@SpringBootApplication
 public class ReliableSecretBackupApplication
 {
 	public static void main(String[] args)
@@ -27,7 +28,7 @@ public class ReliableSecretBackupApplication
 //		service.saveFile(pass, "src/main/resources/test_2.txt", true);
 //		service.saveFile(pass, "src/main/resources/pic_test.png", false);
 
-		service.showAllFilesInfo(pass).forEach(System.out::println);
+		service.getFilesInfo(pass, FileType.ALL).forEach(System.out::println);
 
 //		service.downloadFile(pass, 0L, "downloaded/");
 //		service.downloadFile(pass, 1L, "downloaded/");

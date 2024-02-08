@@ -14,12 +14,12 @@ public interface CryptoService
 
     byte[] generatePasswordHash(char[] password);
 
-    default void erase(char[] password)
+    static void erase(char[] password)
     {
         Arrays.fill(password, (char) 0);
     }
 
-    default void erase(byte[] password)
+    static void erase(byte[] password)
     {
         Arrays.fill(password, (byte) 0);
     }
