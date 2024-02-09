@@ -9,6 +9,8 @@ public interface ReliableBackupService
 {
     void authorizeInCloud();
 
+    boolean isFileAreOnDisk();
+
     void createInitCloudElements(char[] pass);
 
     void saveFile(char[] pass, String filePath, Boolean isTracked);

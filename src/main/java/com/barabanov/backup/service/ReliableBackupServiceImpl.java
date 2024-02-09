@@ -59,6 +59,23 @@ public class ReliableBackupServiceImpl implements ReliableBackupService
 
 
     @Override
+    public boolean isFileAreOnDisk()
+    {
+        if (getAppFolderId() == null)
+            return false;
+        if (getStorageFolderId() == null ||
+                getMasterFileCloudId() == null ||
+                getAppDataCloudId() == null)
+        {
+            cloudService.delete(getAppFolderId());
+            return false;
+        }
+        else
+            return true;
+    }
+
+
+    @Override
     public void saveFile(char[] pass, String filePath, Boolean isTracked)
     {
         File file = new File(filePath);
@@ -127,7 +144,7 @@ public class ReliableBackupServiceImpl implements ReliableBackupService
             InputStream decryptedIS = cryptoService.decrypt(pass, cloudService.downloadFile(fileInfo.getCloudId()));
             try
             {
-                File targetFile = new File(fileDirectory + fileInfo.getName());
+                File targetFile = new File(fileDirectory + "\\" + fileInfo.getName());
                 Files.createDirectories(targetFile.getAbsoluteFile().toPath().getParent());
 
                 Files.copy(decryptedIS, targetFile.toPath());

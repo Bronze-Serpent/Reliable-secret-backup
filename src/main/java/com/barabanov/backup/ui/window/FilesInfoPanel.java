@@ -18,9 +18,10 @@ public class FilesInfoPanel extends JPanel
         super(new MigLayout(
                 "wrap",
                 "[]",
-                "[]5[]5[]"
+                "[]5[]5[]5[]5[]"
         ));
-
+        JLabel showFileLbl = new JLabel("Просмотр файлов");
+        showFileLbl.setFont(new Font("Dialog", Font.BOLD, 14));
         Dimension showBtnSize = new Dimension(250, 20);
 
         JButton trackedFilesBtn = new JButton("Список отслеживаемых файлов");
@@ -35,6 +36,8 @@ public class FilesInfoPanel extends JPanel
         allFilesBtn.setMinimumSize(showBtnSize);
         allFilesBtn.addActionListener(new ShowFilesListener(this, backupService, FileType.ALL, passSupplier));
 
+        this.add(showFileLbl);
+        this.add(showFileLbl);
         this.add(trackedFilesBtn);
         this.add(untrackedFilesBtn);
         this.add(allFilesBtn);

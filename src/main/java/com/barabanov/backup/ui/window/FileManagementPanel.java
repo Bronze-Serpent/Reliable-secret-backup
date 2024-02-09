@@ -14,10 +14,12 @@ public class FileManagementPanel extends JPanel
     {
         super(new MigLayout("insets 12",
                 "[]",
-                "[]20[]20[]"));
+                "[]20[]20[]20[]"));
 
         this.add(new SaveFilePanel(backupService, passSupplier), "wrap");
         this.add(new FilesInfoPanel(backupService, passSupplier), "wrap");
-        this.add(new ModifyFilePanel(backupService, passSupplier));
+        this.add(new ModifyFilePanel(backupService, passSupplier), "wrap");
+        this.add(new DownloadFilePanel(backupService, passSupplier), "wrap");
+        this.add(new DeleteFilePanel(backupService, passSupplier));
     }
 }

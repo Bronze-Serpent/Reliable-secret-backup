@@ -15,8 +15,8 @@ public class SaveFilePanel extends JPanel
     {
         super(new MigLayout(
                 "",
-                "[]10[]",
-                "[]5[]5[]5[]"
+                "[]5[]",
+                "[]5[]5[]5[]10[]"
         ));
 
         JLabel selectedPathLbl = new JLabel();
@@ -54,11 +54,14 @@ public class SaveFilePanel extends JPanel
                 }
         );
 
-        this.add(selectFileBtn, "wrap");
+        JLabel saveFileLbl = new JLabel("Сохранение файла");
+        saveFileLbl.setFont(new Font("Dialog", Font.BOLD, 14));
+        this.add(saveFileLbl, "span");
         this.add(selectedFileLbl);
         this.add(selectedPathLbl, "wrap");
         this.add(trackLbl);
         this.add(trackCheckBox, "wrap");
+        this.add(selectFileBtn);
         this.add(saveBtn);
     }
 }

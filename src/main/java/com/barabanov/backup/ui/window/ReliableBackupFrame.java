@@ -18,6 +18,7 @@ public class ReliableBackupFrame extends JFrame
 
         // третий параметр - другая панель, на которой все остальные панели
         PasswordPanel passwordPanel = new PasswordPanel(
+                backupService,
                 secretHolder::setPass,
                 this,
                 new FileManagementPanel(backupService, secretHolder::getPass)
