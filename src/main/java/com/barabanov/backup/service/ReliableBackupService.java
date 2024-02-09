@@ -18,4 +18,8 @@ public interface ReliableBackupService
     void downloadFile(char[] pass, Long id, String directory);
 
     List<FileInfoDto> checkAllTrackedFiles(char[] pass);
+
+    void changeTrackingPolicy(char[] pass, Long fileId);
+
+    void deleteFile(char[] pass, Long fileId);
 }

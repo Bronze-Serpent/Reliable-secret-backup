@@ -1,5 +1,6 @@
 package com.barabanov.backup;
 
+import com.barabanov.backup.service.ReliableBackupService;
 import com.barabanov.backup.ui.window.ReliableBackupFrame;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,6 +12,11 @@ import java.awt.*;
 @SpringBootApplication
 public class SwingApp extends ReliableBackupFrame
 {
+    public SwingApp(ReliableBackupService backupService)
+    {
+        super(backupService);
+    }
+
     public static void main(String[] args)
     {
 

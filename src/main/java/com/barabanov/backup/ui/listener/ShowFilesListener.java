@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 
 @RequiredArgsConstructor
@@ -17,27 +19,32 @@ public class ShowFilesListener extends AbstractAction
     private final Component whereToShow;
     private final ReliableBackupService backupService;
     private final FileType fileType;
-    private final char[] pass;
+    private final Supplier<char[]> passSupplier;
 
 
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        List<FileInfoDto> filesInfo = backupService.getFilesInfo(pass, fileType);
+        List<FileInfoDto> filesInfo = backupService.getFilesInfo(passSupplier.get(), fileType);
 
-        StringBuilder sb = new StringBuilder();
+        String[] columnNames = {"Id", "Filename", "Size (Kb)", "Date", "MD5", "Is tracked"};
+        List<String[]> tableData = new ArrayList<>();
+
         for (FileInfoDto fileInfoDto : filesInfo)
         {
-            sb.append(String.format("%3d - %40s - %7d - %10s - md5: %32s - is tracked: %5s",
-                    fileInfoDto.getId(),
+            tableData.add(new String[]{
+                    fileInfoDto.getId().toString(),
                     fileInfoDto.getName(),
-                    fileInfoDto.getSize(),
-                    fileInfoDto.getCreatedDate(),
+                    fileInfoDto.getSize().toString(),
+                    fileInfoDto.getCreatedDate().toString(),
                     fileInfoDto.getMd5(),
-                    fileInfoDto.getIsTracked().toString()
-                    ));
+                    fileInfoDto.getIsTracked().toString()}
+            );
         }
+        JTable filesTable = new JTable(tableData.toArray(String[][]::new), columnNames);
+        filesTable.setFillsViewportHeight(true);
+        JScrollPane scrollPane = new JScrollPane(filesTable);
 
-        JOptionPane.showMessageDialog(whereToShow, sb.toString());
+        JOptionPane.showMessageDialog(whereToShow, scrollPane);
     }
 }

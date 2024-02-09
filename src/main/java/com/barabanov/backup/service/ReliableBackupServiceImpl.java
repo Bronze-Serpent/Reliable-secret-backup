@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -167,11 +168,57 @@ public class ReliableBackupServiceImpl implements ReliableBackupService
     }
 
 
+    @Override
+    public void changeTrackingPolicy(char[] pass, Long fileId)
+    {
+        MasterFile masterFile = getObjectFromCloud(pass, getMasterFileCloudId(), MasterFile.class);
+
+        for (FileInfoDto fileInfoDto : masterFile.getFilesInfo())
+        {
+            if (fileInfoDto.getId().equals(fileId))
+                fileInfoDto.setIsTracked(!fileInfoDto.getIsTracked());
+        }
+
+        updateAppFiles(pass, masterFile);
+    }
+
+
+    @Override
+    public void deleteFile(char[] pass, Long fileId)
+    {
+        MasterFile masterFile = getObjectFromCloud(pass, getMasterFileCloudId(), MasterFile.class);
+
+        Iterator<FileInfoDto> dtoIterator = masterFile.getFilesInfo().iterator();
+        while (dtoIterator.hasNext())
+        {
+            FileInfoDto fileInfoDto = dtoIterator.next();
+            if (fileInfoDto.getId().equals(fileId))
+            {
+                cloudService.delete(fileInfoDto.getCloudId());
+                dtoIterator.remove();
+                break;
+            }
+        }
+
+        updateAppFiles(pass, masterFile);
+    }
+
+
     private void updateAppFiles(char[] pass, StoredAppDataDto appDataDto, MasterFile masterFile)
     {
         try
         {
             cloudService.update(getAppDataCloudId(), cryptoService.encrypt(pass, new ByteArrayInputStream(objectmapper.writeValueAsString(appDataDto).getBytes())));
+            cloudService.update(getMasterFileCloudId(), cryptoService.encrypt(pass, new ByteArrayInputStream(objectmapper.writeValueAsString(masterFile).getBytes())));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void updateAppFiles(char[] pass, MasterFile masterFile)
+    {
+        try
+        {
             cloudService.update(getMasterFileCloudId(), cryptoService.encrypt(pass, new ByteArrayInputStream(objectmapper.writeValueAsString(masterFile).getBytes())));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

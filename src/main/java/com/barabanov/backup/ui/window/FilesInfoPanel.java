@@ -6,26 +6,37 @@ import com.barabanov.backup.ui.listener.ShowFilesListener;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import java.awt.*;
+import java.util.function.Supplier;
 
 
 public class FilesInfoPanel extends JPanel
 {
 
-    public FilesInfoPanel(ReliableBackupService backupService, char[] pass)
+    public FilesInfoPanel(ReliableBackupService backupService, Supplier<char[]> passSupplier)
     {
-        super(new MigLayout());
+        super(new MigLayout(
+                "wrap",
+                "[]",
+                "[]5[]5[]"
+        ));
+
+        Dimension showBtnSize = new Dimension(250, 20);
 
         JButton trackedFilesBtn = new JButton("Список отслеживаемых файлов");
-        trackedFilesBtn.addActionListener(new ShowFilesListener(this, backupService, FileType.TRACKED, pass));
+        trackedFilesBtn.setMinimumSize(showBtnSize);
+        trackedFilesBtn.addActionListener(new ShowFilesListener(this, backupService, FileType.TRACKED, passSupplier));
 
         JButton untrackedFilesBtn = new JButton("Список неотслеживаемых файлов");
-        trackedFilesBtn.addActionListener(new ShowFilesListener(this, backupService, FileType.UNTRACKED, pass));
+        untrackedFilesBtn.setMinimumSize(showBtnSize);
+        untrackedFilesBtn.addActionListener(new ShowFilesListener(this, backupService, FileType.UNTRACKED, passSupplier));
 
         JButton allFilesBtn = new JButton("Список сохранённых файлов");
-        trackedFilesBtn.addActionListener(new ShowFilesListener(this, backupService, FileType.ALL, pass));
+        allFilesBtn.setMinimumSize(showBtnSize);
+        allFilesBtn.addActionListener(new ShowFilesListener(this, backupService, FileType.ALL, passSupplier));
 
-        this.add(trackedFilesBtn, "span");
-        this.add(untrackedFilesBtn, "span");
-        this.add(allFilesBtn, "span");
+        this.add(trackedFilesBtn);
+        this.add(untrackedFilesBtn);
+        this.add(allFilesBtn);
     }
 }
