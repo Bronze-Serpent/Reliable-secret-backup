@@ -1,5 +1,7 @@
-#application.backup:
+application.backup:
+#  file.checker.delay: 2000
 #  app.folder.name:
 #  storage.folder.name:
 #  master.file.name:
 #  app.info.file.name:
+

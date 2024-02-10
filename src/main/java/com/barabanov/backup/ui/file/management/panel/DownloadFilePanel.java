@@ -1,4 +1,4 @@
-package com.barabanov.backup.ui.window;
+package com.barabanov.backup.ui.file.management.panel;
 
 import com.barabanov.backup.service.ReliableBackupService;
 import net.miginfocom.swing.MigLayout;

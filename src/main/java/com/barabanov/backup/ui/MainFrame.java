@@ -1,20 +1,21 @@
-package com.barabanov.backup.ui.window;
+package com.barabanov.backup.ui;
 
 import com.barabanov.backup.service.ReliableBackupService;
 import com.barabanov.backup.ui.SecretHolder;
+import com.barabanov.backup.ui.PasswordPanel;
+import com.barabanov.backup.ui.file.management.FileManagementPanel;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
 
 
-public class ReliableBackupFrame extends JFrame
+public class MainFrame extends JFrame
 {
 
-    public ReliableBackupFrame(ReliableBackupService backupService)
+    public MainFrame(ReliableBackupService backupService, SecretHolder secretHolder)
     {
         super("Безопасное надёжное сохранение файлов");
-        SecretHolder secretHolder = new SecretHolder();
 
         // третий параметр - другая панель, на которой все остальные панели
         PasswordPanel passwordPanel = new PasswordPanel(
@@ -25,7 +26,6 @@ public class ReliableBackupFrame extends JFrame
         );
 
         this.add(passwordPanel);
-
 
         this.pack();
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -1,4 +1,4 @@
-package com.barabanov.backup.ui.window;
+package com.barabanov.backup.ui;
 
 import com.barabanov.backup.service.ReliableBackupService;
 import net.miginfocom.swing.MigLayout;
@@ -7,7 +7,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 
 public class PasswordPanel extends JPanel
@@ -51,8 +50,12 @@ public class PasswordPanel extends JPanel
         this.add(passSubmitBtn);
     }
 
+
     private void initBackupInfrastructure(ReliableBackupService backupService, char[] pass)
     {
+        // на деле бесполезно тут т.к. при проверке на файл всё равно будет авторизация
+        backupService.authorizeInCloud();
+
         if (!backupService.isFileAreOnDisk())
         {
             backupService.createInitCloudElements(pass);
