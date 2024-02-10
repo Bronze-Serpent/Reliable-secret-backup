@@ -1,6 +1,7 @@
 package com.barabanov.backup.ui.file.check;
 
 import com.barabanov.backup.service.ReliableBackupService;
+import com.barabanov.backup.service.dto.ChangeFileDto;
 import com.barabanov.backup.service.dto.FileInfoDto;
 import com.barabanov.backup.ui.file.check.components.CheckResultFrame;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class ScheduledFileChecker
     @Scheduled(fixedRateString = "${application.backup.file.checker.delay:60000}")
     public void checkAllFiles()
     {
-        List<FileInfoDto> fileInfoModifiedFiles = backupService.checkAllTrackedFiles(passSupplier.get());
+        List<ChangeFileDto> fileInfoModifiedFiles = backupService.checkAllTrackedFiles(passSupplier.get());
 
         CheckResultFrame checkResultFrame = new CheckResultFrame(fileInfoModifiedFiles);
         checkResultFrame.pack();

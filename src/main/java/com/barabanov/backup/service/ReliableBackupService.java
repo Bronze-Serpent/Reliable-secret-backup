@@ -1,5 +1,6 @@
 package com.barabanov.backup.service;
 
+import com.barabanov.backup.service.dto.ChangeFileDto;
 import com.barabanov.backup.service.dto.FileInfoDto;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public interface ReliableBackupService
 
     void downloadFile(char[] pass, Long id, String directory);
 
-    List<FileInfoDto> checkAllTrackedFiles(char[] pass);
+    List<ChangeFileDto> checkAllTrackedFiles(char[] pass);
 
     void changeTrackingPolicy(char[] pass, Long fileId);
 

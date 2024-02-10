@@ -13,13 +13,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAsync
 @EnableScheduling
 @SpringBootApplication
-public class SwingApp extends MainFrame
+public class SwingApp
 {
-    public SwingApp(ReliableBackupService backupService, SecretHolder secretHolder)
-    {
-        super(backupService, secretHolder);
-    }
-
     public static void main(String[] args)
     {
         var contextBuilder = new SpringApplicationBuilder(SwingApp.class)
@@ -27,8 +22,11 @@ public class SwingApp extends MainFrame
                 .web(WebApplicationType.NONE)
                 .run(args);
 
-        var swingApp = contextBuilder.getBean(SwingApp.class);
-        swingApp.setVisible(true);
+        SecretHolder secretHolder = contextBuilder.getBean(SecretHolder.class);
+        ReliableBackupService backupService = contextBuilder.getBean(ReliableBackupService.class);
+
+        MainFrame mainSwingFrame = new MainFrame(backupService, secretHolder);
+        mainSwingFrame.setVisible(true);
     }
 
 }

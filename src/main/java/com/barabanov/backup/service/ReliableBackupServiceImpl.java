@@ -2,6 +2,7 @@ package com.barabanov.backup.service;
 
 import com.barabanov.backup.cloud.CloudService;
 import com.barabanov.backup.cryptography.CryptoService;
+import com.barabanov.backup.service.dto.ChangeFileDto;
 import com.barabanov.backup.service.dto.FileInfoDto;
 import com.barabanov.backup.service.dto.MasterFile;
 import com.barabanov.backup.service.dto.StoredAppDataDto;
@@ -21,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.barabanov.backup.service.ChangeType.MODIFIED;
+import static com.barabanov.backup.service.ChangeType.REMOVED;
 import static com.barabanov.backup.service.FileType.ALL;
 import static com.barabanov.backup.service.FileType.TRACKED;
 
@@ -158,26 +161,36 @@ public class ReliableBackupServiceImpl implements ReliableBackupService
     // считываю Master-file и файлы по одному считываю по id,
     // их расшифровываю, вычисляю хэш и сравниваю с тем, что хранится в master-file
     @Override
-    public List<FileInfoDto> checkAllTrackedFiles(char[] pass)
+    public List<ChangeFileDto> checkAllTrackedFiles(char[] pass)
     {
         MasterFile masterFile = getObjectFromCloud(pass, getMasterFileCloudId(), MasterFile.class);
-        List<FileInfoDto> notVerified = new ArrayList<>();
+        List<ChangeFileDto> notVerified = new ArrayList<>();
 
         for (FileInfoDto fileInfoDto : masterFile.getFilesInfo())
         {
             if (fileInfoDto.getIsTracked())
             {
-                String cloudId = fileInfoDto.getCloudId();
-                try(InputStream fileIO = cryptoService.decrypt(pass, cloudService.downloadFile(cloudId)))
+                String cloudId;
+                try
                 {
-                    String newMd5Hash = cryptoService.getMd5HashFor(fileIO);
+                    cloudId = fileInfoDto.getCloudId();
 
-                    if(!newMd5Hash.equals(fileInfoDto.getMd5()))
-                        notVerified.add(fileInfoDto);
-                } catch (IOException e)
-                {
-                    throw new RuntimeException(e);
+                    try(InputStream fileIO = cryptoService.decrypt(pass, cloudService.downloadFile(cloudId)))
+                    {
+                        String newMd5Hash = cryptoService.getMd5HashFor(fileIO);
+
+                        if(!newMd5Hash.equals(fileInfoDto.getMd5()))
+                            notVerified.add(new ChangeFileDto(MODIFIED, fileInfoDto));
+                    } catch (IOException e)
+                    {
+                        throw new RuntimeException(e);
+                    }
                 }
+                catch (Exception e)
+                {
+                    notVerified.add(new ChangeFileDto(REMOVED, fileInfoDto));
+                }
+
             }
         }
 
@@ -211,8 +224,14 @@ public class ReliableBackupServiceImpl implements ReliableBackupService
             FileInfoDto fileInfoDto = dtoIterator.next();
             if (fileInfoDto.getId().equals(fileId))
             {
-                cloudService.delete(fileInfoDto.getCloudId());
                 dtoIterator.remove();
+                try {
+                    cloudService.delete(fileInfoDto.getCloudId());
+                }
+                catch (Exception e)
+                {
+                    // если тут случается ошибка -> удаляемого файла нет -> делать ничего и не надо
+                }
                 break;
             }
         }

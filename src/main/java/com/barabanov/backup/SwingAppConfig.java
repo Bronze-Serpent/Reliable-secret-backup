@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.function.Supplier;
 
 @Configuration
-public class Config
+public class SwingAppConfig
 {
 
     @Bean

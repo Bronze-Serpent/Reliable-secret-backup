@@ -1,6 +1,6 @@
 package com.barabanov.backup.ui.file.check.components;
 
-import com.barabanov.backup.service.dto.FileInfoDto;
+import com.barabanov.backup.service.dto.ChangeFileDto;
 
 import javax.swing.*;
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 
 public class CheckResultFrame extends JFrame
 {
-    public CheckResultFrame(List<FileInfoDto> fileInfoModifiedFiles)
+    public CheckResultFrame(List<ChangeFileDto> fileInfoModifiedFiles)
     {
         super("Результаты проверки целостности файлов");
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
