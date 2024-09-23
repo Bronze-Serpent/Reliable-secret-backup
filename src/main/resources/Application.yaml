@@ -5,3 +5,13 @@ application.backup:
 #  master.file.name:
 #  app.info.file.name:
 
+crypto:
+  encode:
+    algorithm: Blowfish
+
+  pas:
+      algorithm: PBKDF2WithHmacSHA1
+  hash:
+    algorithm: MD5
+
+
